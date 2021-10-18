@@ -14,7 +14,8 @@ You should see something like this:
 Usage: coteji [OPTIONS] COMMAND [ARGS]...
 
 Options:
-  --config TEXT
+  --config TEXT  path to the script configuration (*.coteji.kts) file. Default
+                 value: 'config.coteji.kts' (current directory)
   -h, --help     Show this message and exit
 
 Commands:
