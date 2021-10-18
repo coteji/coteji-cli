@@ -3,6 +3,9 @@ plugins {
     application
 }
 
+version = "0.2.0"
+group = "io.github.coteji"
+
 repositories {
     mavenCentral()
 }
