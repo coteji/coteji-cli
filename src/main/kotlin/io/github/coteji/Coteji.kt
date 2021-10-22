@@ -27,6 +27,7 @@ import io.github.coteji.core.Coteji
 import io.github.coteji.core.IdUpdateMode
 import io.github.coteji.exceptions.TestSourceException
 import io.github.coteji.model.SyncResult
+import io.github.coteji.runner.evaluateScript
 import io.github.coteji.utils.printWith
 import java.io.File
 import javax.script.ScriptException
@@ -37,7 +38,7 @@ import kotlin.script.experimental.host.toScriptSource
 import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
 import kotlin.script.experimental.jvmhost.createJvmCompilationConfigurationFromTemplate
 
-val coteji: Coteji by lazy { Coteji() }
+lateinit var coteji: Coteji
 
 class CotejiCommand : CliktCommand() {
     val configFilePath by option(
@@ -47,17 +48,7 @@ class CotejiCommand : CliktCommand() {
     ).default("config.coteji.kts")
 
     override fun run() {
-        val source = File(configFilePath).toScriptSource()
-        val configuration = createJvmCompilationConfigurationFromTemplate<ConfigCotejiScript>()
-
-        BasicJvmScriptingHost().eval(source, configuration, ScriptEvaluationConfiguration {
-            implicitReceivers(coteji)
-        }).onFailure { result ->
-            result.reports.subList(0, result.reports.size - 1).forEach { echo(it) }
-            val error = result.reports.last()
-            val location = error.location?.start
-            throw ScriptException("${error.message} (${error.sourcePath}:${location?.line}:${location?.col})")
-        }
+        coteji = evaluateScript(File(configFilePath)) { echo(it) }
     }
 }
 
@@ -144,10 +135,7 @@ class TryQuery : CliktCommand(help = "Prints the list of tests from the Source f
     }
 }
 
-private fun handleIdUpdateMode(
-    idUpdateMode: IdUpdateMode,
-    result: SyncResult
-) {
+private fun handleIdUpdateMode(idUpdateMode: IdUpdateMode, result: SyncResult) {
     when (idUpdateMode) {
         IdUpdateMode.WARNING -> {
             if (result.testsWithoutId.isNotEmpty()) {
