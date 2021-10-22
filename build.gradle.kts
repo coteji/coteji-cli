@@ -5,7 +5,7 @@ plugins {
     id("org.jetbrains.dokka") version "1.4.32"
 }
 
-version = "0.2.1"
+version = "0.2.2"
 group = "io.github.coteji"
 
 repositories {
@@ -29,5 +29,14 @@ distributions {
         this.contents
             .rename("^coteji-cli$", "coteji")
             .rename("coteji-cli\\.bat", "coteji.bat")
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("cotejiCli") {
+            artifact(tasks.distZip)
+            artifact(tasks.distTar)
+        }
     }
 }
